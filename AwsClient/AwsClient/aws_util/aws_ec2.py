@@ -1,7 +1,7 @@
 from .aws_client import AwsEc2Client
 from .aws_exception import APICallException
 
-from typing import List
+from typing import List, Optional
 import sys
 
 class AwsEc2Object(object):
@@ -23,6 +23,12 @@ class AwsEc2Object(object):
 
 
 class AwsEc2Instance(AwsEc2Object):
+    class NetworkInterface:
+        def __init__(self, network_interface):
+            self._data = network_interface
+
+        def id(self) -> str:
+            return self._data.get('NetworkInterfaceId')
 
     class State:
         def __init__(self, state):
@@ -64,20 +70,26 @@ class AwsEc2Instance(AwsEc2Object):
     def is_valid(self) -> bool:
         return super().is_valid() and self.instance_id() != ""
 
-    def instance_id(self) -> str:
-        return self._data.get('InstanceId', "")
+    def instance_id(self) -> Optional[str]:
+        return self._data.get('InstanceId')
 
-    def instance_type(self) -> str:
-        return self._data.get('InstanceType', "")
+    def vpc_id(self) -> Optional[str]:
+        return self._data.get('VpcId')
 
-    def public_ip(self) -> str:
-        return self._data.get('PublicIpAddress', "")
+    def instance_type(self) -> Optional[str]:
+        return self._data.get('InstanceType')
+
+    def public_ip(self) -> Optional[str]:
+        return self._data.get('PublicIpAddress')
 
     def state(self) -> State:
         return self.State(self._data.get('State'))
 
     def security_groups(self) -> List[SecurityGroup]:
         return [ self.SecurityGroup(sg) for sg in self._data.get('SecurityGroups')]
+
+    def network_interfaces(self) -> List[NetworkInterface]:
+        return [ self.NetworkInterface(ni) for ni in self._data.get('NetworkInterfaces') ]
 
     def describe(self) -> str:
         text = ""
@@ -105,11 +117,11 @@ class AwsEc2Instance(AwsEc2Object):
         return [AwsEc2Instance(i) for i in instances]
 
 
-class AwsEc2SecurityGroup(AwsEc2Object):
-
+class AwsEc2SecurityGroup(AwsEc2Object):    
     ##########################
     # for Public
     ##########################
+    SECURITY_GROUP_MAX = 5
     class IpPermission:
         class IpRange:
             def __init__(self, range):
@@ -215,6 +227,7 @@ class AwsEc2Image(AwsEc2Object):
         text += f"ImageId       : {self.image_id()}\n"    
         return text
 
+
     ##########################
     # for Private
     ##########################
@@ -227,4 +240,24 @@ class AwsEc2Image(AwsEc2Object):
 
     def __init__(self, data):
         super().__init__(data)
+
+
+class AwsEc2Util:
+
+    @classmethod
+    def modify_network_interface_attribute(cls, dry_run :bool, instance :AwsEc2Instance, security_groups :List[AwsEc2SecurityGroup])->bool:
+        if not instance.is_valid():
+            raise InvalidValueException()    
+        #‰^—p“s‡ãÁ‚µ‚Ä‚é‚¯‚Ç–{“–‚Í‚â‚é‚×‚«‚©
+        #for sg in security_groups:
+        #    if not sg.is_valid():
+        #        raise InvalidValueException()
+        if len(security_groups) > AwsEc2SecurityGroup.SECURITY_GROUP_MAX:
+                raise InvalidValueException()
+
+        client = AwsEc2Client()
+        res = client.modify_network_interface_attribute(dry_run, instance.network_interfaces()[0].id(),
+                                                        [sg.group_id() for sg in security_groups])
+        return res.is_http_success()
+        
 

@@ -23,6 +23,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AwsClient.py" />
+    <Compile Include="aws_manage\aws_ec2.py" />
+    <Compile Include="aws_manage\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="aws_util\aws_client.py" />
     <Compile Include="aws_util\aws_exception.py" />
     <Compile Include="aws_util\aws_response.py" />
@@ -44,6 +48,7 @@
     </Interpreter>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="aws_manage\" />
     <Folder Include="NewFolder1\" />
     <Folder Include="aws_util\" />
   </ItemGroup>
