@@ -1,0 +1,6 @@
+
+class APICallException(Exception):
+    pass
+
+
+

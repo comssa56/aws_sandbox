@@ -1,6 +1,5 @@
 
 class AwsResponse(object):
-    _data = None
     def __init__(self, response):
         self._data = response
 
@@ -12,7 +11,6 @@ class AwsResponse(object):
         return meta.is_valid() and meta.is_success()
 
 class ResponseMetaData(object):
-    _data = None
     def __init__(self, response):
         self._data = response.get('ResponseMetadata')
 

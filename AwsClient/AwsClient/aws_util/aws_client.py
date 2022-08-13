@@ -3,16 +3,7 @@ from .aws_response import AwsResponse
 import boto3
 
 
-class AwsInstance():
-    _data = None
-
-    def __init__(self, data):
-        self._data = data
-
-
 class AwsClient(object):
-    _connection = None
-
     def __init__(self, resource_name :str):
         conf = AwsConf()
         access_conf = conf.get(conf.KEY_ACCESS)
@@ -43,3 +34,6 @@ class AwsEc2Client(AwsClient):
 
     def describe_security_groups_by_name(self, names):
         return AwsResponse(self.connection().describe_security_groups(Filters=[{'Name':'tag:Name', 'Values':names}]))
+
+    def describe_images(self):
+        return AwsResponse(self.connection().describe_images(Owners=['self']))
