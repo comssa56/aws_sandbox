@@ -5,5 +5,7 @@ class APICallException(Exception):
 class InvalidValueException(Exception):
     pass
 
+class NotFoundException(Exception):
+    pass
 
 

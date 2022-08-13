@@ -23,8 +23,10 @@ class AwsEc2Manager(object):
     def add_security_group_to_instance(cls, instance_name :str, sg_name :str)->bool:
         instance = AwsEc2Instance.fetch_by_name(instance_name)
         sg = AwsEc2SecurityGroup.fetch_by_name(sg_name)
-        if not instance.is_valid() or not sg.is_valid():
-            return False
+        if not instance.is_valid():
+            raise NotFoundException(instance_name)
+        if not sg.is_valid():
+            raise NotFoundException(sg_name)
 
         sgs = instance.security_groups()
         sgs.append(sg)
@@ -34,8 +36,10 @@ class AwsEc2Manager(object):
     def delete_security_group_to_instance(cls, instance_name :str, sg_name :str)->bool:
         instance = AwsEc2Instance.fetch_by_name(instance_name)
         sg = AwsEc2SecurityGroup.fetch_by_name(sg_name)
-        if not instance.is_valid() or not sg.is_valid():
-            return False
+        if not instance.is_valid():
+            raise NotFoundException(instance_name)
+        if not sg.is_valid():
+            raise NotFoundException(sg_name)
 
         sgs = list(filter(lambda _sg: _sg.group_id()!=sg.group_id(), instance.security_groups()))
         return AwsEc2Util.modify_network_interface_attribute(False, instance, sgs)
