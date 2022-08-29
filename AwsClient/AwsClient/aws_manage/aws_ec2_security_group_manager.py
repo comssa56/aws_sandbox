@@ -9,7 +9,7 @@ class AwsEc2SecurityGroupManager(object):
         return AwsEc2SecurityGroup.fetch_by_names(names)
 
     @classmethod
-    def fetch_security_group_by_name(cls, name :str) -> AwsEc2SecurityGroup
+    def fetch_security_group_by_name(cls, name :str) -> AwsEc2SecurityGroup:
         return AwsEc2SecurityGroup.fetch_by_name(name)
 
 
