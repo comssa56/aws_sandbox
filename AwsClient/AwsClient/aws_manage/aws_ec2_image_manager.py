@@ -17,13 +17,19 @@ class AwsEc2ImageManager(object):
     def fetch_images_by_names(cls, names :List[str]) -> List[AwsEc2Image]:
         return AwsEc2Image.fetch_by_names(names)
 
+
     @classmethod
-    def create_image_from_instnace(cls, name :str, base_instance :AwsEc2Instance):
+    def verify_for_create_image_from_instance(cls, name :str, instance_name :str) -> bool:
+        base_instance = AwsEc2Instance.fetch_by_name(instance_name)
         image = cls.fetch_images_by_name(name)
         if image.is_valid():
             raise InvalidValueException(name)
         if not base_instance.is_valid():
             raise InvalidValueException(base_instance.instance_id())
+        return True
 
+    @classmethod
+    def create_image_from_instnace(cls, name :str, instance_name :str):
+        cls.verify_for_create_image_from_instance(name, instance_name)
+        base_instance = AwsEc2Instance.fetch_by_name(instance_name)
         return AwsEc2Image.create_image_from_instance(name, base_instance)
-
