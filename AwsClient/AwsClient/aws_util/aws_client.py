@@ -69,3 +69,6 @@ class AwsEc2Client(AwsClient):
                     ]
                 },
             ]))
+
+    def get_waiter(self, waiter_name :str):
+        return self.connection().get_waiter(waiter_name)

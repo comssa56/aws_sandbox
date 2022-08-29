@@ -202,6 +202,7 @@ class AwsEc2SecurityGroup(AwsEc2Object):
 
 
 class AwsEc2Image(AwsEc2Object):
+    ImageId = str
 
     ##########################
     # for Public
@@ -213,17 +214,38 @@ class AwsEc2Image(AwsEc2Object):
         return cls.response2instances(res)
 
     @classmethod
+    def fetch_by_ids(cls, ids :List[str]):
+        client = AwsEc2Client()
+        res = client.describe_images_by_ids(ids)
+        return cls.response2instances(res)
+
+    @classmethod
     def fetch_by_names(cls, names :List[str]):
         client = AwsEc2Client()
         res = client.describe_images_by_names(names)
         return cls.response2instances(res)
 
     @classmethod
-    def create_image_from_instance(cls, name :str, base_instance: AwsEc2Instance):
+    def create_image_from_instance(cls, name :str, base_instance: AwsEc2Instance) -> str:
         client = AwsEc2Client()
         res = client.create_image(False, name, base_instance.instance_id())
-        print(res)
+        if not res.is_http_success():
+            raise APICallException( { "cls": cls.__name__, "func": sys._getframe().f_code.co_name })
+        return res._data.get('ImageId')
 
+    @classmethod
+    def wait_create_image(cls, image_id :str):
+        waiter = cls.get_waiter_for_image_available()
+        waiter.wait(
+            ImageIds=[image_id],
+            Owners=['self'],
+            IncludeDeprecated=False,
+            DryRun=False,
+            WaiterConfig={
+                'Delay': 15,
+                'MaxAttempts': 40
+            }
+        )
 
     def is_valid(self) -> bool:
         return super().is_valid() and self.image_id() != None
@@ -234,11 +256,15 @@ class AwsEc2Image(AwsEc2Object):
     def image_name(self)->Optional[str]:
         return self._data.get('Name')
 
+    def state(self)->Optional[str]:
+        return self._data.get('State')
+
     def describe(self)->str:
         text = ""
         text += f"Name          : {self.name()}\n"    
         text += f"ImageName     : {self.image_name()}\n"    
         text += f"ImageId       : {self.image_id()}\n"    
+        text += f"State         : {self.state()}\n"    
         return text
 
 
@@ -252,8 +278,15 @@ class AwsEc2Image(AwsEc2Object):
         instances = res._data.get('Images')
         return [AwsEc2Image(i) for i in instances]
 
+    @classmethod
+    def get_waiter_for_image_available(cls):
+        client = AwsEc2Client()
+        return client.get_waiter('image_available')
+
     def __init__(self, data=None):
         super().__init__(data)
+
+
 
 
 class AwsEc2Util:
