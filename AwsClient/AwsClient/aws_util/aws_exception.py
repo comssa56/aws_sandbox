@@ -1,11 +1,14 @@
 
-class APICallException(Exception):
+class AwsException(Exception):
     pass
 
-class InvalidValueException(Exception):
+class APICallException(AwsException):
     pass
 
-class NotFoundException(Exception):
+class InvalidValueException(AwsException):
+    pass
+
+class NotFoundException(AwsException):
     pass
 
 

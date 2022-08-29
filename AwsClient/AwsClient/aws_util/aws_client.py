@@ -23,20 +23,26 @@ class AwsEc2Client(AwsClient):
     def __init__(self):
         super().__init__("ec2")
 
-    def describe_instance_by_name(self, name) -> AwsResponse:
+    def describe_instance_by_name(self, name :str) -> AwsResponse:
         return AwsResponse(self.connection().describe_instances(Filters=[{'Name':'tag:Name', 'Values':[name]}]))
 
-    def describe_instances_by_name(self, names) -> AwsResponse:
+    def describe_instances_by_name(self, names :List[str]) -> AwsResponse:
         return AwsResponse(self.connection().describe_instances(Filters=[{'Name':'tag:Name', 'Values':names}]))
 
-    def describe_security_group_by_name(self, name) -> AwsResponse:
+    def describe_security_group_by_name(self, name :str) -> AwsResponse:
         return AwsResponse(self.connection().describe_security_groups(Filters=[{'Name':'tag:Name', 'Values':[name]}]))
 
-    def describe_security_groups_by_name(self, names) -> AwsResponse:
+    def describe_security_groups_by_name(self, names :List[str]) -> AwsResponse:
         return AwsResponse(self.connection().describe_security_groups(Filters=[{'Name':'tag:Name', 'Values':names}]))
 
     def describe_images(self) -> AwsResponse:
         return AwsResponse(self.connection().describe_images(Owners=['self']))
+
+    def describe_images_by_ids(self, ids :List[str]) -> AwsResponse:
+        return AwsResponse(self.connection().describe_images(Owners=['self'], ImageIds=ids))
+
+    def describe_images_by_names(self, names :List[str]) -> AwsResponse:
+        return AwsResponse(self.connection().describe_images(Owners=['self'], Filters=[{'Name':'tag:Name', 'Values':names}]))
 
     def modify_network_interface_attribute(self, dry_run :bool, network_interface_id : str, groups :List[str]) -> AwsResponse:
         return AwsResponse(self.connection().modify_network_interface_attribute(
@@ -44,3 +50,22 @@ class AwsEc2Client(AwsClient):
             Groups=groups,
             NetworkInterfaceId=network_interface_id,
         ))
+
+    def create_image(self, dry_run :bool, name :str, base_instance_id :str, description=''):
+        return AwsResponse(self.connection().create_image(
+            DryRun= dry_run,
+            Name=name,
+            InstanceId=base_instance_id,
+            Description= description,
+            NoReboot=False,
+            TagSpecifications=[
+                {
+                    'ResourceType': 'image',
+                    'Tags': [
+                        {
+                            'Key': 'Name',
+                            'Value': name
+                        },
+                    ]
+                },
+            ]))

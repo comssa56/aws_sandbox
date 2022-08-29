@@ -1,5 +1,5 @@
 from .aws_client import AwsEc2Client
-from .aws_exception import APICallException
+from .aws_exception import APICallException, InvalidValueException
 
 from typing import List, Optional
 import sys
@@ -16,10 +16,11 @@ class AwsEc2Object(object):
 
     def tag(self, key) -> str:
         tags = self._data.get('Tags')
-        for v in tags:
-            if v.get('Key')==key:
-                return v.get('Value')
-        return None 
+        if tags is not None:
+            for v in tags:
+                if v.get('Key')==key:
+                    return v.get('Value')
+            return None 
 
 
 class AwsEc2Instance(AwsEc2Object):
@@ -62,7 +63,6 @@ class AwsEc2Instance(AwsEc2Object):
         res = client.describe_instance_by_name(name)
         instances = cls.response2instances(res)
         return  instances[0] if len(instances)>0 else AwsEc2Instance(None)
-
 
     def __init__(self, data):
         super().__init__(data)
@@ -212,6 +212,19 @@ class AwsEc2Image(AwsEc2Object):
         res = client.describe_images()
         return cls.response2instances(res)
 
+    @classmethod
+    def fetch_by_names(cls, names :List[str]):
+        client = AwsEc2Client()
+        res = client.describe_images_by_names(names)
+        return cls.response2instances(res)
+
+    @classmethod
+    def create_image_from_instance(cls, name :str, base_instance: AwsEc2Instance):
+        client = AwsEc2Client()
+        res = client.create_image(False, name, base_instance.instance_id())
+        print(res)
+
+
     def is_valid(self) -> bool:
         return super().is_valid() and self.image_id() != None
 
@@ -223,6 +236,7 @@ class AwsEc2Image(AwsEc2Object):
 
     def describe(self)->str:
         text = ""
+        text += f"Name          : {self.name()}\n"    
         text += f"ImageName     : {self.image_name()}\n"    
         text += f"ImageId       : {self.image_id()}\n"    
         return text
@@ -238,7 +252,7 @@ class AwsEc2Image(AwsEc2Object):
         instances = res._data.get('Images')
         return [AwsEc2Image(i) for i in instances]
 
-    def __init__(self, data):
+    def __init__(self, data=None):
         super().__init__(data)
 
 
@@ -248,7 +262,9 @@ class AwsEc2Util:
     def modify_network_interface_attribute(cls, dry_run :bool, instance :AwsEc2Instance, security_groups :List[AwsEc2SecurityGroup])->bool:
         if not instance.is_valid():
             raise InvalidValueException()    
-        #â^ópìsçáè„è¡ÇµÇƒÇÈÇØÇ«ñ{ìñÇÕÇ‚ÇÈÇ◊Ç´Ç©
+        ###############################
+        # This validation is hoped, but this security_groups is expected from AwsEc2Instance, that do not have enough param for AwsEc2SecurityGroup.
+        ###############################
         #for sg in security_groups:
         #    if not sg.is_valid():
         #        raise InvalidValueException()

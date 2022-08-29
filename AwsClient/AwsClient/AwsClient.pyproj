@@ -24,6 +24,7 @@
   <ItemGroup>
     <Compile Include="AwsClient.py" />
     <Compile Include="aws_manage\aws_ec2.py" />
+    <Compile Include="aws_manage\aws_ec2_image_manager.py" />
     <Compile Include="aws_manage\__init__.py">
       <SubType>Code</SubType>
     </Compile>
@@ -49,7 +50,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="aws_manage\" />
-    <Folder Include="NewFolder1\" />
     <Folder Include="aws_util\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
