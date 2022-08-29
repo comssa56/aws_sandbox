@@ -1,7 +1,7 @@
 from aws_util.aws_ec2 import AwsEc2Instance, AwsEc2Image
 from aws_util.aws_exception import *
 
-from typing import Iterable, Iterator, List
+from typing import List
 
 class AwsEc2ImageManager(object):
     @classmethod
