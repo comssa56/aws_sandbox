@@ -1,7 +1,7 @@
 from .aws_conf import AwsConf
 from .aws_response import AwsResponse
 import boto3
-from typing import List
+from typing import List, Dict
 
 class AwsClient(object):
     def __init__(self, resource_name :str):
@@ -23,26 +23,44 @@ class AwsEc2Client(AwsClient):
     def __init__(self):
         super().__init__("ec2")
 
-    def describe_instance_by_name(self, name :str) -> AwsResponse:
-        return AwsResponse(self.connection().describe_instances(Filters=[{'Name':'tag:Name', 'Values':[name]}]))
+    '''
+       ec2 instance
+    '''
+    def describe_instances(self, filters :List[Dict]) -> AwsResponse:
+        return AwsResponse(self.connection().describe_instances(Filters=filters))
 
-    def describe_instances_by_name(self, names :List[str]) -> AwsResponse:
-        return AwsResponse(self.connection().describe_instances(Filters=[{'Name':'tag:Name', 'Values':names}]))
+    def describe_instances_by_names(self, names :List[str]) -> AwsResponse:
+        return self.describe_instances([{'Name':'tag:Name', 'Values':names}])
+
+    def describe_instance_by_name(self, name :str) -> AwsResponse:
+        return self.describe_instances_by_names([name])
+
+
+
+    '''
+       ec2 security group
+    '''
+    def describe_security_groups(self, filters) -> AwsResponse:
+        return AwsResponse(self.connection().describe_security_groups(Filters=filters))
+
+    def describe_security_groups_by_names(self, names :List[str]) -> AwsResponse:
+        return self.describe_security_groups([{'Name':'tag:Name', 'Values':names}])
 
     def describe_security_group_by_name(self, name :str) -> AwsResponse:
-        return AwsResponse(self.connection().describe_security_groups(Filters=[{'Name':'tag:Name', 'Values':[name]}]))
+        return self.describe_security_groups_by_names([name])
 
-    def describe_security_groups_by_name(self, names :List[str]) -> AwsResponse:
-        return AwsResponse(self.connection().describe_security_groups(Filters=[{'Name':'tag:Name', 'Values':names}]))
 
-    def describe_images(self) -> AwsResponse:
-        return AwsResponse(self.connection().describe_images(Owners=['self']))
+    '''
+       ec2 image (AMI)
+    '''
+    def describe_images(self, image_ids, filters) -> AwsResponse:
+        return AwsResponse(self.connection().describe_images(Owners=['self'], ImageIds=image_ids, Filters=filters))
 
     def describe_images_by_ids(self, ids :List[str]) -> AwsResponse:
-        return AwsResponse(self.connection().describe_images(Owners=['self'], ImageIds=ids))
+        return self.describe_images(image_ids=ids, filters=[])
 
     def describe_images_by_names(self, names :List[str]) -> AwsResponse:
-        return AwsResponse(self.connection().describe_images(Owners=['self'], Filters=[{'Name':'tag:Name', 'Values':names}]))
+        return self.describe_images(image_ids=[], filters=[{'Name':'tag:Name', 'Values':names}])
 
     def modify_network_interface_attribute(self, dry_run :bool, network_interface_id : str, groups :List[str]) -> AwsResponse:
         return AwsResponse(self.connection().modify_network_interface_attribute(

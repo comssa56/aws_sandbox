@@ -23,6 +23,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AwsClient.py" />
+    <Compile Include="aws_manage\aws_ec2_manager.py" />
     <Compile Include="aws_manage\aws_ec2_image_manager.py" />
     <Compile Include="aws_manage\aws_ec2_instance_manager.py" />
     <Compile Include="aws_manage\__init__.py">
@@ -30,6 +31,9 @@
     </Compile>
     <Compile Include="aws_manage\aws_ec2_security_group_manager.py" />
     <Compile Include="aws_util\aws_client.py" />
+    <Compile Include="aws_util\aws_ec2_image.py" />
+    <Compile Include="aws_util\aws_ec2_instance.py" />
+    <Compile Include="aws_util\aws_ec2_security_group.py" />
     <Compile Include="aws_util\aws_exception.py" />
     <Compile Include="aws_util\aws_response.py" />
     <Compile Include="aws_util\__init__.py">

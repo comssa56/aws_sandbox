@@ -1,4 +1,5 @@
 
+from aws_manage.aws_ec2_manager import AwsEc2Manager
 from aws_manage.aws_ec2_security_group_manager import AwsEc2SecurityGroupManager
 from aws_manage.aws_ec2_instance_manager import AwsEc2InstanceManager
 from aws_manage.aws_ec2_image_manager import AwsEc2ImageManager
@@ -11,11 +12,9 @@ from aws_manage.aws_ec2_image_manager import AwsEc2ImageManager
 #instance = AwsEc2InstanceManager.fetch_instance_by_name('test')
 #print(instance.describe())
 
-image_id = AwsEc2ImageManager.create_image_from_instnace( 'test11-image',  'test')
+image_id = AwsEc2Manager.create_image_from_instance('test13-image',  'com_test')
 AwsEc2ImageManager.wait_create_image(image_id)
-image = AwsEc2ImageManager.fetch_image_by_id(image_id)
-print(image.describe())
-
-images = AwsEc2ImageManager.fetch_images()
+images = AwsEc2ImageManager.fetch_by_ids([image_id])
 for image in images:
     print(image.describe())
+
